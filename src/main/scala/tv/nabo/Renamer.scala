@@ -35,9 +35,9 @@ object Renamer extends Helpers {
 //      scribe.info(s"File: ${f.getName} / ${rename(f)}")
       rename(f) match {
         case Some(er) => if (settings.rename) {
-          er.rename("Columbo")
+          er.rename(settings.show)
         } else {
-          val newFile = er.newFile("Columbo")
+          val newFile = er.newFile(settings.show)
           scribe.info(s"Rename ${er.current.getName} to ${newFile.getName}")
         }
         case None => scribe.warn(s"No match for '${f.getName}'")
@@ -80,5 +80,6 @@ case class EpisodeRename(current: File,
 case class Episode(title: String, season: Int, number: Int)
 
 case class Settings(rename: Boolean = false,
+                    show: String,
                     directory: File,
                     increment: Int = 0)
