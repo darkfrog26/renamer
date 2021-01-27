@@ -1,0 +1,9 @@
+{
+  "renamer": {
+    "rename": false,
+    "show": "The Monkees",
+    "directory": "/fileserver/videos/temp/The Monkees/TV/Season 2",
+    "season": 2,
+    "increment": -32
+  }
+}

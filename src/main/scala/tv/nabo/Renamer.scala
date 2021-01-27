@@ -13,6 +13,7 @@ object Renamer extends Helpers {
   val StandardMatcher: Regex = """.*[S[s]](\p{Digit}{2})\.?[E[e]](\p{Digit}{1,2})[. -]*(.*)[.].+""".r
   val LongMatcher: Regex = """.*Season (\p{Digit}{2}) Episode (\p{Digit}{2})[. -]*(.*)[.].+""".r
   val SimpleMatcher: Regex = """.*(\p{Digit}{1,2}+)x(\p{Digit}{1,2}+)[. -]*(.*)[.].+""".r
+  val EpisodeOnlyMatcher: Regex = """Episode (\p{Digit}{2}) [-] (.+)[.].+""".r
 
   val matchers = List(
     partial {
@@ -23,6 +24,9 @@ object Renamer extends Helpers {
     },
     partial {
       case SimpleMatcher(season, episode, title) => Episode(title, season.toInt, episode.toInt)
+    },
+    partial {
+      case EpisodeOnlyMatcher(episode, title) => Episode(title, settings.season, episode.toInt)
     }
   )
 
@@ -81,5 +85,6 @@ case class Episode(title: String, season: Int, number: Int)
 
 case class Settings(rename: Boolean = false,
                     show: String,
+                    season: Int = 1,
                     directory: File,
                     increment: Int = 0)

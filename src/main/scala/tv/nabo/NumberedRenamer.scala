@@ -7,7 +7,7 @@ import perfolation._
 object NumberedRenamer {
   private lazy val EpisodeRegex = """.+[eE](\d+)(.+)[.](.+)""".r
 
-  def main(args: Array[String]): Unit = {
+  def mainOld(args: Array[String]): Unit = {
     val directory = new File("/fileserver/videos/tv/Kyle XY")
     rename(directory, "Kyle XY", List(10, 23, 10), testFlight = false)
   }
