@@ -1,19 +1,23 @@
 package tv.nabo
 
-import java.io.File
+import fabric.MergeType
+import fabric.rw.RW
 
+import java.io.File
 import perfolation._
-import profig.{Helpers, Profig}
+import profig._
 
 import scala.util.matching.Regex
 
-object Renamer extends Helpers {
+object Renamer {
   private[nabo] lazy val settings = Profig("renamer").as[Settings]
 
   val StandardMatcher: Regex = """.*[S[s]](\p{Digit}{2})\.?[E[e]](\p{Digit}{1,2})[. -]*(.*)[.].+""".r
   val LongMatcher: Regex = """.*Season (\p{Digit}{2}) Episode (\p{Digit}{2})[. -]*(.*)[.].+""".r
   val SimpleMatcher: Regex = """.*(\p{Digit}{1,2}+)x(\p{Digit}{1,2}+)[. -]*(.*)[.].+""".r
   val EpisodeOnlyMatcher: Regex = """Episode (\p{Digit}{2}) [-] (.+)[.].+""".r
+  val FourDigitDoubleMatcher: Regex = """(.+) (\p{Digit}{2})(\p{Digit}{2})-(\p{Digit}{2}) (.+)[.].+?""".r
+  val FourDigitMatcher: Regex = """(.+) (\p{Digit}{2})(\p{Digit}{2}) (.+)[.].+?""".r
 
   val matchers = List(
     partial {
@@ -27,12 +31,18 @@ object Renamer extends Helpers {
     },
     partial {
       case EpisodeOnlyMatcher(episode, title) => Episode(title, settings.season, episode.toInt)
+    },
+    partial {
+      case FourDigitDoubleMatcher(_, season, episode, _, title) => Episode(title, season.toInt, episode.toInt)
+    },
+    partial {
+      case FourDigitMatcher(_, season, episode, title) => Episode(title, season.toInt, episode.toInt)
     }
   )
 
   def main(args: Array[String]): Unit = {
-    Profig.loadDefaults()
-    Profig.merge(args)
+    Profig.initConfiguration()
+    Profig.merge(args.toList, MergeType.Overwrite)
 
     scribe.info(s"Directory: ${settings.directory.getAbsolutePath}")
     settings.directory.listFiles().foreach { f =>
@@ -50,7 +60,7 @@ object Renamer extends Helpers {
   }
 
   def rename(file: File): Option[EpisodeRename] = {
-    matchers.toStream.flatMap(r => r.unapply(file).map(EpisodeRename(file, _, r))).headOption
+    matchers.to(LazyList).flatMap(r => r.unapply(file).map(EpisodeRename(file, _, r))).headOption
   }
 
   def partial(f: PartialFunction[String, Episode]): RenameMatcher = new RenameMatcher {
@@ -88,3 +98,7 @@ case class Settings(rename: Boolean = false,
                     season: Int = 1,
                     directory: File,
                     increment: Int = 0)
+
+object Settings {
+  implicit val rw: RW[Settings] = RW.gen
+}

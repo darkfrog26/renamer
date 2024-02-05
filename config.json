@@ -1,8 +1,8 @@
 {
   "renamer": {
-    "rename": false,
-    "show": "The Monkees",
-    "directory": "/fileserver/videos/temp/The Monkees/TV/Season 2",
+    "rename": true,
+    "show": "Seinfeld",
+    "directory": "/Users/mhicks/fileserver/videos/tv/Seinfeld/Season 9",
     "season": 2,
     "increment": -32
   }
